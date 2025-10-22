@@ -6,8 +6,8 @@ on:
       - main
 
 env:
-  IMAGE_NAME: ${{ secrets.IMAGE_NAME }}    # set in repo secrets, e.g. youruser/nodejs-demo-app
-  TAG: ${{ github.sha }}                   # image tag (commit sha). You can also use github.ref_name or date.
+  IMAGE_NAME: ${{ secrets.IMAGE_NAME }}    # e.g., youruser/nodejs-demo-app
+  TAG: ${{ github.sha }}                   # commit SHA as tag
 
 jobs:
   test:
@@ -75,8 +75,9 @@ jobs:
         env:
           IMAGE: ${{ env.IMAGE_NAME }}:${{ env.TAG }}
           IMAGE_LATEST: ${{ env.IMAGE_NAME }}:latest
+          SSH_PORT: ${{ secrets.SSH_PORT || '22' }}
         run: |
-          ssh -o StrictHostKeyChecking=no ${{ secrets.SSH_USER }}@${{ secrets.SSH_HOST }} -p ${ { secrets.SSH_PORT || 22 } } << 'EOF'
+          ssh -o StrictHostKeyChecking=no ${{ secrets.SSH_USER }}@${{ secrets.SSH_HOST }} -p $SSH_PORT << 'EOF'
             docker pull $IMAGE || docker pull $IMAGE_LATEST
             docker stop nodejs_demo_app || true
             docker rm nodejs_demo_app || true
