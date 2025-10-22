@@ -72,7 +72,7 @@ optional-deploy:
         ssh-private-key: ${{ secrets.SSH_PRIVATE_KEY }}
 
     - name: Deploy: Pull image and restart container
-      run: |
+      run: 
         # Define variables
         IMAGE="${{ env.IMAGE_NAME }}:${{ env.TAG }}"
         IMAGE_LATEST="${{ env.IMAGE_NAME }}:latest"
