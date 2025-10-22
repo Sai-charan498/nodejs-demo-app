@@ -56,35 +56,8 @@ jobs:
           tags: |
             ${{ env.IMAGE_NAME }}:latest
             ${{ env.IMAGE_NAME }}:${{ env.TAG }}
+            exit
+    EOF
 
-optional-deploy:
-  name: Deploy to server (optional)
-  needs: build-and-push
-  runs-on: ubuntu-latest
-  if: ${{ secrets.SSH_HOST != '' && secrets.SSH_PRIVATE_KEY != '' }}
-  steps:
-    - name: Install SSH client
-      run: sudo apt-get update && sudo apt-get install -y openssh-client
 
-    - name: Setup SSH key
-      uses: webfactory/ssh-agent@v0.8.1
-      with:
-        ssh-private-key: ${{ secrets.SSH_PRIVATE_KEY }}
 
-    - name: Deploy: Pull image and restart container
-      run: 
-        # Define variables
-        IMAGE="${{ env.IMAGE_NAME }}:${{ env.TAG }}"
-        IMAGE_LATEST="${{ env.IMAGE_NAME }}:latest"
-        SSH_PORT="${{ secrets.SSH_PORT }}"
-        SSH_PORT="${SSH_PORT:-22}"
-
-        # Connect to server and deploy
-        ssh -o StrictHostKeyChecking=no ${{ secrets.SSH_USER }}@${{ secrets.SSH_HOST }} -p $SSH_PORT << 'EOF'
-          docker pull $IMAGE || docker pull $IMAGE_LATEST
-          docker stop nodejs_demo_app || true
-          docker rm nodejs_demo_app || true
-          docker run -d --restart unless-stopped --name nodejs_demo_app -p 3000:3000 $IMAGE || docker run -d --restart unless-stopped --name nodejs_demo_app -p 3000:3000 $IMAGE_LATEST
-          docker image prune -f
-          exit
-        EOF
