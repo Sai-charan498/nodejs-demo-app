@@ -43,8 +43,8 @@ jobs:
         run: npm run build
         working-directory: ./nodejs-demo-app
 
-  build-and-push:
-    name: Build & Push to Docker Hub
+  docker-build:
+    name: Build Docker Image
     needs: test
     runs-on: ubuntu-latest
     if: github.event_name == 'push' && github.ref == 'refs/heads/main'
@@ -52,55 +52,24 @@ jobs:
       - name: Checkout
         uses: actions/checkout@v4
 
-      - name: Set up QEMU
-        uses: docker/setup-qemu-action@v3
-
       - name: Set up Docker Buildx
         uses: docker/setup-buildx-action@v3
 
-      - name: Login to Docker Hub
-        uses: docker/login-action@v3
-        with:
-          username: ${{ secrets.DOCKER_HUB_USERNAME }}
-          password: ${{ secrets.DOCKER_HUB_PASSWORD }}
-
-      - name: Build and push Docker image
+      - name: Build Docker image (local)
         uses: docker/build-push-action@v5
         with:
           context: ./nodejs-demo-app
           file: ./nodejs-demo-app/Dockerfile
-          platforms: linux/amd64,linux/arm64
-          push: true
-          tags: |
-            ${{ secrets.DOCKER_HUB_USERNAME }}/nodejs-demo-app:latest
-            ${{ secrets.DOCKER_HUB_USERNAME }}/nodejs-demo-app:${{ github.sha }}
-          labels: |
-            org.opencontainers.image.title=Node.js Demo App
-            org.opencontainers.image.description=A simple Node.js Express application with CI/CD
-            org.opencontainers.image.vendor=Sai Charan
-            org.opencontainers.image.source=https://github.com/${{ github.repository }}
-            org.opencontainers.image.revision=${{ github.sha }}
+          push: false
+          tags: nodejs-demo-app:latest
           cache-from: type=gha
           cache-to: type=gha,mode=max
 
-  deploy:
-    name: Deploy Application
-    needs: [test, build-and-push]
-    runs-on: ubuntu-latest
-    if: github.event_name == 'push' && github.ref == 'refs/heads/main'
-    steps:
-      - name: Login to Docker Hub
-        uses: docker/login-action@v3
-        with:
-          username: ${{ secrets.DOCKER_HUB_USERNAME }}
-          password: ${{ secrets.DOCKER_HUB_PASSWORD }}
-
-      - name: Test Docker Hub image
+      - name: Test Docker image locally
         run: |
-          echo "🧪 Testing Docker Hub image..."
-          docker pull ${{ secrets.DOCKER_HUB_USERNAME }}/nodejs-demo-app:latest
-          docker run -d -p 3000:3000 --name test-container ${{ secrets.DOCKER_HUB_USERNAME }}/nodejs-demo-app:latest
-          sleep 15
+          echo "🧪 Testing Docker image locally..."
+          docker run -d -p 3000:3000 --name test-container nodejs-demo-app:latest
+          sleep 10
 
           # Test health endpoint
           echo "Testing health endpoint..."
@@ -116,11 +85,12 @@ jobs:
 
           docker stop test-container
           docker rm test-container
-          echo "✅ All deployment tests passed!"
+          echo "✅ All Docker tests passed!"
 
-      - name: Deployment Summary
+      - name: Success Summary
         run: |
-          echo "🚀 Deployment completed successfully!"
-          echo "📦 Docker Hub Image: ${{ secrets.DOCKER_HUB_USERNAME }}/nodejs-demo-app:latest"
-          echo "🔗 Pull command: docker pull ${{ secrets.DOCKER_HUB_USERNAME }}/nodejs-demo-app:latest"
-          echo "🏃 Run command: docker run -p 3000:3000 ${{ secrets.DOCKER_HUB_USERNAME }}/nodejs-demo-app:latest"
+          echo "🎉 CI/CD Pipeline completed successfully!"
+          echo "✅ Code quality checks passed"
+          echo "✅ Unit tests passed"
+          echo "✅ Docker build successful"
+          echo "✅ Application tested and working"
