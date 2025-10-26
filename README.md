@@ -1,4 +1,9 @@
-# Welcome to your Lovable project
+# Smart Cart Engine
+
+[![CI/CD](https://github.com/Sai-charan498/smart-cart-engine/actions/workflows/main.yml/badge.svg)](https://github.com/Sai-charan498/smart-cart-engine/actions/workflows/main.yml)
+[![Docker](https://img.shields.io/badge/docker-ready-blue.svg)](https://github.com/Sai-charan498/smart-cart-engine)
+
+A modern React application built with Vite, TypeScript, and shadcn/ui components, fully containerized with Docker.
 
 ## Project info
 
@@ -60,8 +65,45 @@ This project is built with:
 - shadcn-ui
 - Tailwind CSS
 
+## 🚀 Quick Start
+
+### Local Development
+```bash
+npm install
+npm run dev
+```
+
+### Docker Deployment
+```bash
+# Production build
+docker build -t smart-cart-engine .
+docker run -p 3000:80 smart-cart-engine
+
+# Or use Docker Compose
+docker-compose --profile prod up --build
+```
+
+### Testing
+```bash
+npm test          # Run tests
+npm run test:lint # Run linting
+npm run build     # Build for production
+```
+
+## 🔄 CI/CD Pipeline
+
+This project includes a complete CI/CD pipeline that:
+- ✅ Runs tests and linting on every push/PR
+- 🐳 Builds and pushes Docker images to registry
+- 🚀 Automatically deploys on successful builds
+- 📊 Provides build status badges
+
 ## How can I deploy this project?
 
+### Option 1: Docker Deployment
+The application is fully containerized and ready for deployment on any Docker-compatible platform.
+
+### Option 2: Lovable Platform
 Simply open [Lovable](https://lovable.dev/projects/b3c90fbf-835e-45fc-bcb8-80f410b8d7c0) and click on Share -> Publish.
 
 ## Can I connect a custom domain to my Lovable project?
