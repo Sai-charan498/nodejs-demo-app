@@ -1,19 +1,32 @@
-# Use an official Node LTS runtime
-FROM node:18-alpine
+# Multi-stage build for React Vite app
+FROM node:18-alpine AS builder
 
-# Create app directory
-WORKDIR /usr/src/app
+# Set working directory
+WORKDIR /app
 
-# Copy package.json first to leverage Docker cache
+# Copy package files
 COPY package*.json ./
 
-# Install app dependencies
-RUN npm ci --only=production
+# Install all dependencies (including dev dependencies for build)
+RUN npm ci
 
-# Copy the rest of the app
+# Copy source code
 COPY . .
 
-# Expose the port and run
-ENV PORT=3000
-EXPOSE 3000
-CMD ["node", "src/index.js"]
+# Build the application
+RUN npm run build
+
+# Production stage
+FROM nginx:alpine
+
+# Copy built assets from builder stage
+COPY --from=builder /app/dist /usr/share/nginx/html
+
+# Copy custom nginx config
+COPY nginx.conf /etc/nginx/nginx.conf
+
+# Expose port 80 (nginx default)
+EXPOSE 80
+
+# Start nginx
+CMD ["nginx", "-g", "daemon off;"]
