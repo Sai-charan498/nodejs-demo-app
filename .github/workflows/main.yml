@@ -1,4 +1,4 @@
-name: CI/CD - React Vite Docker Deploy
+name: Node.js CI/CD Pipeline with Docker Hub
 
 on:
   push:
@@ -9,8 +9,9 @@ on:
       - main
 
 env:
-  IMAGE_NAME: smart-cart-engine
-  TAG: ${{ github.sha }}
+  NODE_VERSION: '18'
+  IMAGE_NAME: nodejs-demo-app
+  DOCKER_HUB_REPO: ${{ secrets.DOCKER_HUB_USERNAME }}/nodejs-demo-app
 
 jobs:
   test:
