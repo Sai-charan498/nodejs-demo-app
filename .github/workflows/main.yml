@@ -9,7 +9,7 @@ on:
       - main
 
 env:
-  NODE_VERSION: '18'
+  NODE_VERSION: "18"
   IMAGE_NAME: nodejs-demo-app
   DOCKER_HUB_REPO: ${{ secrets.DOCKER_HUB_USERNAME }}/nodejs-demo-app
 
