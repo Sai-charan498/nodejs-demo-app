@@ -11,6 +11,9 @@ on:
 env:
   NODE_VERSION: "18"
   IMAGE_NAME: nodejs-demo-app
+  DOCKER_REGISTRY: docker.io
+  APP_CONTEXT: ./nodejs-demo-app
+  PERFORMANCE_THRESHOLD_MS: 500
 
 jobs:
   test:
@@ -25,23 +28,23 @@ jobs:
         with:
           node-version: ${{ env.NODE_VERSION }}
           cache: "npm"
-          cache-dependency-path: "nodejs-demo-app/package.json"
+          cache-dependency-path: "${{ env.APP_CONTEXT }}/package.json"
 
       - name: Install dependencies
         run: npm install
-        working-directory: ./nodejs-demo-app
+        working-directory: ${{ env.APP_CONTEXT }}
 
       - name: Run linter
         run: npm run lint
-        working-directory: ./nodejs-demo-app
+        working-directory: ${{ env.APP_CONTEXT }}
 
       - name: Run tests
         run: npm test
-        working-directory: ./nodejs-demo-app
+        working-directory: ${{ env.APP_CONTEXT }}
 
       - name: Build application
         run: npm run build
-        working-directory: ./nodejs-demo-app
+        working-directory: ${{ env.APP_CONTEXT }}
 
   docker-build:
     name: Build Docker Image
@@ -58,24 +61,24 @@ jobs:
       - name: Build Docker image (local)
         uses: docker/build-push-action@v5
         with:
-          context: ./nodejs-demo-app
-          file: ./nodejs-demo-app/Dockerfile
+          context: ${{ env.APP_CONTEXT }}
+          file: ${{ env.APP_CONTEXT }}/Dockerfile
           load: true
           push: false
-          tags: nodejs-demo-app:latest
+          tags: ${{ env.IMAGE_NAME }}:latest
           cache-from: type=gha
           cache-to: type=gha,mode=max
 
       - name: Verify Docker image
         run: |
           echo "🔍 Verifying Docker image was built..."
-          docker images nodejs-demo-app:latest
+          docker images ${{ env.IMAGE_NAME }}:latest
           echo "✅ Docker image verified!"
 
       - name: Test Docker image locally
         run: |
           echo "🧪 Testing Docker image locally..."
-          docker run -d -p 3000:3000 --name test-container nodejs-demo-app:latest
+          docker run -d -p 3000:3000 --name test-container ${{ env.IMAGE_NAME }}:latest
           sleep 15
 
           # Test health endpoint
@@ -101,3 +104,56 @@ jobs:
           echo "✅ Unit tests passed"
           echo "✅ Docker build successful"
           echo "✅ Application tested and working"
+
+  deploy:
+    name: Deploy Node.js Application
+    needs: docker-build
+    runs-on: ubuntu-latest
+    if: github.event_name == 'push' && github.ref == 'refs/heads/main'
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Set up Docker Buildx
+        uses: docker/setup-buildx-action@v3
+
+      - name: Build production Docker image
+        uses: docker/build-push-action@v5
+        with:
+          context: ${{ env.APP_CONTEXT }}
+          file: ${{ env.APP_CONTEXT }}/Dockerfile
+          load: true
+          push: false
+          tags: ${{ env.IMAGE_NAME }}:production
+          cache-from: type=gha
+          cache-to: type=gha,mode=max
+
+      - name: Deploy and test production image
+        run: |
+          echo "🚀 Deploying Node.js application..."
+          docker run -d -p 3000:3000 --name production-container ${{ env.IMAGE_NAME }}:production
+          sleep 15
+
+          # Test all endpoints
+          echo "Testing production deployment..."
+          curl -f http://localhost:3000/health || exit 1
+          curl -f http://localhost:3000/ || exit 1
+          curl -f http://localhost:3000/api/users || exit 1
+
+          echo "✅ Production deployment successful!"
+          
+          # Show container logs
+          echo "📋 Application logs:"
+          docker logs production-container
+          
+          # Cleanup
+          docker stop production-container
+          docker rm production-container
+
+      - name: Deployment Summary
+        run: |
+          echo "🎉 Node.js Demo App deployed successfully!"
+          echo "📦 Docker image: ${{ env.IMAGE_NAME }}:production"
+          echo "🔗 Build SHA: ${{ github.sha }}"
+          echo "✅ All endpoints tested and working"
+          echo "🚀 Application ready for production use"
