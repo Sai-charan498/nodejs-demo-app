@@ -25,10 +25,10 @@ jobs:
         with:
           node-version: ${{ env.NODE_VERSION }}
           cache: "npm"
-          cache-dependency-path: "nodejs-demo-app/package-lock.json"
+          cache-dependency-path: "nodejs-demo-app/package.json"
 
       - name: Install dependencies
-        run: npm ci
+        run: npm install
         working-directory: ./nodejs-demo-app
 
       - name: Run linter
