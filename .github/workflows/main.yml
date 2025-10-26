@@ -25,7 +25,7 @@ jobs:
         with:
           node-version: ${{ env.NODE_VERSION }}
           cache: "npm"
-          cache-dependency-path: 'nodejs-demo-app/package-lock.json'
+          cache-dependency-path: "nodejs-demo-app/package-lock.json"
 
       - name: Install dependencies
         run: npm ci
@@ -62,7 +62,7 @@ jobs:
         uses: docker/login-action@v3
         with:
           username: ${{ secrets.DOCKER_HUB_USERNAME }}
-          password: ${{ secrets.D }}
+          password: ${{ secrets.DOCKER_HUB_PASSWORD }}
 
       - name: Build and push Docker image
         uses: docker/build-push-action@v5
@@ -93,7 +93,7 @@ jobs:
         uses: docker/login-action@v3
         with:
           username: ${{ secrets.DOCKER_HUB_USERNAME }}
-          password: ${{ secrets.D }}
+          password: ${{ secrets.DOCKER_HUB_PASSWORD }}
 
       - name: Test Docker Hub image
         run: |
@@ -101,19 +101,19 @@ jobs:
           docker pull ${{ secrets.DOCKER_HUB_USERNAME }}/nodejs-demo-app:latest
           docker run -d -p 3000:3000 --name test-container ${{ secrets.DOCKER_HUB_USERNAME }}/nodejs-demo-app:latest
           sleep 15
-          
+
           # Test health endpoint
           echo "Testing health endpoint..."
           curl -f http://localhost:3000/health || exit 1
-          
+
           # Test main endpoint
           echo "Testing main endpoint..."
           curl -f http://localhost:3000/ || exit 1
-          
+
           # Test API endpoint
           echo "Testing API endpoint..."
           curl -f http://localhost:3000/api/users || exit 1
-          
+
           docker stop test-container
           docker rm test-container
           echo "✅ All deployment tests passed!"
