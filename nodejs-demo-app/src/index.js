@@ -12,7 +12,7 @@ app.use(express.json());
 app.use(express.urlencoded({ extended: true }));
 
 // Routes
-app.get('/', (req, res) => {
+app.get('/', (_req, res) => {
   res.json({
     message: 'Welcome to Node.js Demo App!',
     version: '1.0.0',
@@ -21,7 +21,7 @@ app.get('/', (req, res) => {
   });
 });
 
-app.get('/health', (req, res) => {
+app.get('/health', (_req, res) => {
   res.status(200).json({
     status: 'OK',
     uptime: process.uptime(),
@@ -29,7 +29,7 @@ app.get('/health', (req, res) => {
   });
 });
 
-app.get('/api/users', (req, res) => {
+app.get('/api/users', (_req, res) => {
   const users = [
     { id: 1, name: 'John Doe', email: 'john@example.com' },
     { id: 2, name: 'Jane Smith', email: 'jane@example.com' },
@@ -55,13 +55,13 @@ app.post('/api/users', (req, res) => {
 });
 
 // Error handling middleware
-app.use((err, req, res, next) => {
+app.use((err, req, res, _next) => {
   console.error(err.stack);
   res.status(500).json({ error: 'Something went wrong!' });
 });
 
 // 404 handler
-app.use('*', (req, res) => {
+app.use('*', (_req, res) => {
   res.status(404).json({ error: 'Route not found' });
 });
 
