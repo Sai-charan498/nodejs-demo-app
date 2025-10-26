@@ -60,16 +60,23 @@ jobs:
         with:
           context: ./nodejs-demo-app
           file: ./nodejs-demo-app/Dockerfile
+          load: true
           push: false
           tags: nodejs-demo-app:latest
           cache-from: type=gha
           cache-to: type=gha,mode=max
 
+      - name: Verify Docker image
+        run: |
+          echo "🔍 Verifying Docker image was built..."
+          docker images nodejs-demo-app:latest
+          echo "✅ Docker image verified!"
+
       - name: Test Docker image locally
         run: |
           echo "🧪 Testing Docker image locally..."
           docker run -d -p 3000:3000 --name test-container nodejs-demo-app:latest
-          sleep 10
+          sleep 15
 
           # Test health endpoint
           echo "Testing health endpoint..."
