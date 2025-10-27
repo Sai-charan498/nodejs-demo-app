@@ -3,8 +3,10 @@
 A comprehensive Node.js Express demonstration application with automated CI/CD pipeline integration. This project showcases modern DevOps practices with Docker containerization, GitHub Actions automation, and production-ready deployment workflows.
 
 **Live Demo**: [GitHub Repository](https://github.com/Sai-charan498/nodejs-demo-app)  
-**DockerHub Repository**: [DockerHub Repository Link](https://hub.docker.com/r/[your-username]/nodejs-demo-app)
+![alt text](<Screenshot 2025-10-27 140710.png>)
+**DockerHub Repository**: [DockerHub Repository Link](https://hub.docker.com/repositories/saicharan099)
 
+![alt text](<Screenshot 2025-10-27 140821.png>)
 ## 📋 Table of Contents
 
 - [Features](#-features)
